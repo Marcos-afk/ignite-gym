@@ -23,7 +23,7 @@ export const History = () => {
         keyExtractor={(item) => item}
         renderItem={({ item }) => <HistoryCard />}
         renderSectionHeader={({ section: { title } }) => (
-          <Heading color="gray.200" fontSize="md" mt={10} mb={3}>
+          <Heading color="gray.200" fontSize="md" fontFamily="heading" mt={10} mb={3}>
             {title}
           </Heading>
         )}

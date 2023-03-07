@@ -92,7 +92,7 @@ export const Profile = () => {
           <Input placeholder="Nome" bg="gray.600" />
           <Input placeholder="Email" bg="gray.600" isDisabled />
 
-          <Heading color="gray.200" fontSize="md" mb={2} alignSelf="flex-start" mt={12}>
+          <Heading color="gray.200" fontSize="md" fontFamily="heading" mb={2} alignSelf="flex-start" mt={12}>
             Alterar senha
           </Heading>
 

@@ -20,7 +20,7 @@ export const ExerciseCard = ({ ...rest }: ExerciseCardProps) => {
         />
 
         <VStack flex={1}>
-          <Heading fontSize="lg" color="white">
+          <Heading fontSize="lg" color="white" fontFamily="heading">
             Treino de peito
           </Heading>
           <Text fontSize="sm" color="gray.200" mt={1} numberOfLines={2}>

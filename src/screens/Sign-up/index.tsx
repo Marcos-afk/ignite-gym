@@ -5,12 +5,31 @@ import { Input } from '@components/Input';
 import { Button } from '@components/Button';
 import { useNavigation } from '@react-navigation/native';
 import { AuthNavigatorRoutesProps } from '@routes/auth/AuthRoutesProps';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { SignUpFormProps } from './SignUpProps';
+import { SignUpSchema } from './Schemas';
+import { defaultValues } from './DefaultValues';
 
 export const SignUp = () => {
   const { navigate } = useNavigation<AuthNavigatorRoutesProps>();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<SignUpFormProps>({
+    defaultValues: defaultValues,
+    resolver: yupResolver(SignUpSchema),
+  });
 
   const handleNavigateToSignIn = () => {
     navigate('signIn');
+  };
+
+  const handleSignUp = ({ name, email, password, password_confirm }: SignUpFormProps) => {
+    console.log({ name, email, password, password_confirm });
+    reset(defaultValues);
   };
 
   return (
@@ -36,16 +55,63 @@ export const SignUp = () => {
             Crie sua conta
           </Heading>
 
-          <Input placeholder="Nome" />
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, value } }) => (
+              <Input placeholder="Nome" errorMessage={errors.name?.message} value={value} onChangeText={onChange} />
+            )}
+          />
 
-          <Input placeholder="E-mail" keyboardType="email-address" autoCapitalize="none" />
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="E-mail"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={value}
+                onChangeText={onChange}
+                errorMessage={errors.email?.message}
+              />
+            )}
+          />
 
-          <Input placeholder="Senha" secureTextEntry />
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Senha"
+                secureTextEntry
+                value={value}
+                onChangeText={onChange}
+                errorMessage={errors.password?.message}
+              />
+            )}
+          />
 
-          <Button title="Criar e acessar" />
+          <Controller
+            control={control}
+            name="password_confirm"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                placeholder="Confirmar senha"
+                secureTextEntry
+                value={value}
+                onChangeText={onChange}
+                onSubmitEditing={handleSubmit(handleSignUp)}
+                returnKeyType="send"
+                errorMessage={errors.password_confirm?.message}
+              />
+            )}
+          />
+
+          <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} />
         </Center>
 
-        <Button title="Voltar para o login" variant="outline" mt={24} onPress={handleNavigateToSignIn} />
+        <Button title="Voltar para o login" variant="outline" mt={20} mb={4} onPress={handleNavigateToSignIn} />
       </VStack>
     </ScrollView>
   );

@@ -111,7 +111,7 @@ export const SignUp = () => {
           <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} />
         </Center>
 
-        <Button title="Voltar para o login" variant="outline" mt={20} mb={4} onPress={handleNavigateToSignIn} />
+        <Button title="Voltar para o login" variant="outline" mt={12} mb={4} onPress={handleNavigateToSignIn} />
       </VStack>
     </ScrollView>
   );

@@ -1,4 +1,4 @@
-import { VStack, Image, Text, Center, Heading, ScrollView } from 'native-base';
+import { VStack, Image, Text, Center, Heading, ScrollView, useToast } from 'native-base';
 import BackgroundImg from '@assets/background.png';
 import LogoSvg from '@assets/logo.svg';
 import { Input } from '@components/Input';
@@ -10,8 +10,11 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { SignUpFormProps } from './SignUpProps';
 import { SignUpSchema } from './Schemas';
 import { defaultValues } from './DefaultValues';
+import { api } from '@services/api';
+import { AppError } from '@utils/Errors';
 
 export const SignUp = () => {
+  const toast = useToast();
   const { navigate } = useNavigation<AuthNavigatorRoutesProps>();
   const {
     control,
@@ -27,9 +30,24 @@ export const SignUp = () => {
     navigate('signIn');
   };
 
-  const handleSignUp = ({ name, email, password, password_confirm }: SignUpFormProps) => {
-    console.log({ name, email, password, password_confirm });
-    reset(defaultValues);
+  const handleSignUp = async ({ name, email, password }: SignUpFormProps) => {
+    try {
+      await api.post('/users', {
+        name,
+        email,
+        password,
+      });
+      reset(defaultValues);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const message = isAppError ? error.message : 'Erro ao cadastrar usuário. Tente novamente mais tarde.';
+      toast.show({
+        title: 'Erro ao cadastrar usuário',
+        description: message,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    }
   };
 
   return (

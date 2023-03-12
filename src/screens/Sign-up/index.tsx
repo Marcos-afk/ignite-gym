@@ -11,16 +11,19 @@ import { SignUpFormProps } from './SignUpProps';
 import { SignUpSchema } from './Schemas';
 import { defaultValues } from './DefaultValues';
 import { api } from '@services/api';
-import { AppError } from '@utils/Errors';
+import { AppError } from '@utils/errors';
+import { useState } from 'react';
+import { useAuth } from '@hooks/useAuth';
 
 export const SignUp = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
   const toast = useToast();
   const { navigate } = useNavigation<AuthNavigatorRoutesProps>();
   const {
     control,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<SignUpFormProps>({
     defaultValues: defaultValues,
     resolver: yupResolver(SignUpSchema),
@@ -32,15 +35,17 @@ export const SignUp = () => {
 
   const handleSignUp = async ({ name, email, password }: SignUpFormProps) => {
     try {
+      setIsLoading(true);
       await api.post('/users', {
         name,
         email,
         password,
       });
-      reset(defaultValues);
+      await signIn(email, password);
     } catch (error) {
       const isAppError = error instanceof AppError;
       const message = isAppError ? error.message : 'Erro ao cadastrar usuário. Tente novamente mais tarde.';
+      setIsLoading(false);
       toast.show({
         title: 'Erro ao cadastrar usuário',
         description: message,
@@ -129,7 +134,14 @@ export const SignUp = () => {
           <Button title="Criar e acessar" onPress={handleSubmit(handleSignUp)} />
         </Center>
 
-        <Button title="Voltar para o login" variant="outline" mt={12} mb={4} onPress={handleNavigateToSignIn} />
+        <Button
+          title="Voltar para o login"
+          variant="outline"
+          mt={12}
+          mb={4}
+          onPress={handleNavigateToSignIn}
+          isLoading={isLoading}
+        />
       </VStack>
     </ScrollView>
   );

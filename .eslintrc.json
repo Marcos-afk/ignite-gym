@@ -31,7 +31,8 @@
     "@typescript-eslint/no-floating-promises": "off",
     "no-useless-catch": "off",
     "@typescript-eslint/no-misused-promises": "off",
-    "react-hooks/exhaustive-deps": "off"
+    "react-hooks/exhaustive-deps": "off",
+    "@typescript-eslint/no-unsafe-argument": "off"
   },
   "settings": {
     "react": {

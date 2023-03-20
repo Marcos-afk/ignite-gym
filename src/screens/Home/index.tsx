@@ -19,8 +19,8 @@ export const Home = () => {
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
   const toast = useToast();
 
-  const handleOpenExerciseDetail = () => {
-    navigate('exercise');
+  const handleOpenExerciseDetail = (id: number) => {
+    navigate('exercise', { id });
   };
 
   const fetchGroups = async () => {
@@ -106,8 +106,10 @@ export const Home = () => {
 
           <FlatList
             data={exercises}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ExerciseCard exercise={item} onPress={handleOpenExerciseDetail} />}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={({ item }) => (
+              <ExerciseCard exercise={item} onPress={() => handleOpenExerciseDetail(item.id)} />
+            )}
             showsVerticalScrollIndicator={false}
             _contentContainerStyle={{ pb: 20 }}
           />

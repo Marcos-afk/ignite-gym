@@ -1,5 +1,5 @@
 export interface ExerciseDTO {
-  id: string;
+  id: number;
   demo: string;
   group: string;
   name: string;

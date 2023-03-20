@@ -1,26 +1,72 @@
 import { ExerciseCard } from '@components/ExerciseCard';
 import { Group } from '@components/Group';
 import { HomeHeader } from '@components/HomeHeader';
-import { useNavigation } from '@react-navigation/native';
+import { Loading } from '@components/Loading';
+import { ExerciseDTO } from '@dtos/exercises';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { AppNavigatorRoutesProps } from '@routes/app/AppRoutesProps';
-import { FlatList, Heading, HStack, Text, VStack } from 'native-base';
-import { useState } from 'react';
+import { api } from '@services/api';
+import { AppError } from '@utils/errors';
+import { FlatList, Heading, HStack, Text, useToast, VStack } from 'native-base';
+import { useCallback, useEffect, useState } from 'react';
 
 export const Home = () => {
-  const [groups, setGroups] = useState(['biceps', 'ombros', 'peito', 'costas', 'pernas', 'triceps']);
-  const [exercises, setExercises] = useState([
-    'Treino de peito',
-    'Treino de costas',
-    'Treino de pernas',
-    'Treino de triceps',
-  ]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [groups, setGroups] = useState<string[]>([]);
+  const [exercises, setExercises] = useState<ExerciseDTO[]>([]);
 
-  const [groupSelected, setGroupSelected] = useState('biceps');
+  const [groupSelected, setGroupSelected] = useState('');
   const { navigate } = useNavigation<AppNavigatorRoutesProps>();
+  const toast = useToast();
 
   const handleOpenExerciseDetail = () => {
     navigate('exercise');
   };
+
+  const fetchGroups = async () => {
+    try {
+      const { data } = await api.get('/groups');
+      setGroups(data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const message = isAppError ? error.message : 'Erro ao buscar grupos musculares. Tente novamente mais tarde.';
+      toast.show({
+        title: 'Erro ao buscar grupos musculares',
+        description: message,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    }
+  };
+
+  const fetchExercisesByGroup = async () => {
+    try {
+      setIsLoading(true);
+      const { data } = await api.get(`/exercises/bygroup/${groupSelected}`);
+      setExercises(data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const message = isAppError ? error.message : 'Erro ao buscar exercícios. Tente novamente mais tarde.';
+      toast.show({
+        title: 'Erro ao buscar exercícios',
+        description: message,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchExercisesByGroup();
+    }, [groupSelected]),
+  );
 
   return (
     <VStack flex={1}>
@@ -45,24 +91,28 @@ export const Home = () => {
         minH={10}
       />
 
-      <VStack flex={1} px={8}>
-        <HStack justifyContent="space-between" mb={5}>
-          <Heading color="gray.200" fontSize="md" fontFamily="heading">
-            Exercícios
-          </Heading>
-          <Text color="gray.200" fontSize="sm">
-            {exercises.length}
-          </Text>
-        </HStack>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <VStack flex={1} px={8}>
+          <HStack justifyContent="space-between" mb={5}>
+            <Heading color="gray.200" fontSize="md" fontFamily="heading">
+              Exercícios
+            </Heading>
+            <Text color="gray.200" fontSize="sm">
+              {exercises.length}
+            </Text>
+          </HStack>
 
-        <FlatList
-          data={exercises}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => <ExerciseCard onPress={handleOpenExerciseDetail} />}
-          showsVerticalScrollIndicator={false}
-          _contentContainerStyle={{ pb: 20 }}
-        />
-      </VStack>
+          <FlatList
+            data={exercises}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => <ExerciseCard exercise={item} onPress={handleOpenExerciseDetail} />}
+            showsVerticalScrollIndicator={false}
+            _contentContainerStyle={{ pb: 20 }}
+          />
+        </VStack>
+      )}
     </VStack>
   );
 };

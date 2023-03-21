@@ -21,7 +21,6 @@ export const Profile = () => {
   const { user, updateUserProfile, signOut } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
   const [photoIsLoading, setPhotoIsLoading] = useState(false);
-  const [userPhoto, setUserPhoto] = useState('https://avatars.githubusercontent.com/u/72817154?v=4');
   const toast = useToast();
 
   const {
@@ -98,7 +97,32 @@ export const Profile = () => {
           return;
         }
 
-        setUserPhoto(image.uri);
+        const fileExtension = image.uri.split('.').pop();
+        const photoFile = {
+          name: `${user.name}.${fileExtension}`.toLowerCase().replace(' ', '-'),
+          uri: image.uri,
+          type: `${image.type}/${fileExtension}`,
+        } as any;
+
+        const userPhotoUploadFormData = new FormData();
+        userPhotoUploadFormData.append('avatar', photoFile);
+
+        const { data } = await api.patch('/users/avatar', userPhotoUploadFormData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        const userUpdated = user;
+        userUpdated.avatar = data.avatar;
+        await updateUserProfile(userUpdated);
+
+        toast.show({
+          title: 'Foto de perfil atualizada com sucesso!',
+          description: 'Sua foto de perfil foi atualizada com sucesso.',
+          placement: 'top',
+          bgColor: 'green.500',
+        });
       }
     } catch (error) {
       const isAppError = error instanceof AppError;
@@ -123,13 +147,7 @@ export const Profile = () => {
             <Skeleton w={PHOTO_SIZE} h={PHOTO_SIZE} rounded="full" startColor="gray.500" endColor="gray.400" />
           ) : (
             <UserPhoto
-              source={
-                user.avatar
-                  ? {
-                      uri: user.avatar,
-                    }
-                  : UserPhotoDefaultImg
-              }
+              source={user.avatar ? { uri: `${api.defaults.baseURL}/avatar/${user.avatar}` } : UserPhotoDefaultImg}
               alt="avatar"
               size={PHOTO_SIZE}
             />

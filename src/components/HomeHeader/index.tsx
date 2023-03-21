@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { TouchableOpacity } from 'react-native';
 import { useAuth } from '@hooks/useAuth';
 import UserPhotoDefaultImg from '@assets/userPhotoDefault.png';
+import { api } from '@services/api';
 
 export const HomeHeader = () => {
   const { user, signOut } = useAuth();
@@ -14,7 +15,7 @@ export const HomeHeader = () => {
         source={
           user.avatar
             ? {
-                uri: user.avatar,
+                uri: `${api.defaults.baseURL}/avatar/${user.avatar}`,
               }
             : UserPhotoDefaultImg
         }

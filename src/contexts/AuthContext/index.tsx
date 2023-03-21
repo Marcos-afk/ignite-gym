@@ -91,6 +91,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const updateUserProfile = async (user: UserDTO) => {
+    try {
+      setUser(user);
+      await storageUserSave(user);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   useEffect(() => {
     loadUserData();
   }, []);
@@ -102,6 +111,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         signIn,
         signOut,
         isLoadingUserStorageData,
+        updateUserProfile,
       }}
     >
       {children}

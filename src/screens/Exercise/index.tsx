@@ -12,8 +12,10 @@ import { api } from '@services/api';
 import { useEffect, useState } from 'react';
 import { ExerciseDTO } from '@dtos/exercises';
 import { Loading } from '@components/Loading';
+import { AppNavigatorRoutesProps } from '@routes/app/AppRoutesProps';
 
 export const Exercise = () => {
+  const [sendingRegister, setSendingRegister] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [exercise, setExercise] = useState<ExerciseDTO>({} as ExerciseDTO);
   const { goBack } = useNavigation();
@@ -21,6 +23,8 @@ export const Exercise = () => {
   const toast = useToast();
 
   const { id } = params as RouteParamsProps;
+
+  const { navigate } = useNavigation<AppNavigatorRoutesProps>();
 
   const handleGoBack = () => {
     goBack();
@@ -42,6 +46,33 @@ export const Exercise = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExerciseHistoryRegister = async () => {
+    try {
+      setSendingRegister(true);
+      await api.post('/history', { exercise_id: id });
+
+      toast.show({
+        title: 'Parabéns! 👏',
+        description: 'Exercício registrado com sucesso!',
+        placement: 'top',
+        bgColor: 'green.500',
+      });
+
+      navigate('history');
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const message = isAppError ? error.message : 'Erro ao registrar exercício. Tente novamente mais tarde.';
+      toast.show({
+        title: 'Erro ao registrar exercício',
+        description: message,
+        placement: 'top',
+        bgColor: 'red.500',
+      });
+    } finally {
+      setSendingRegister(false);
     }
   };
 
@@ -101,7 +132,11 @@ export const Exercise = () => {
                   </Text>
                 </HStack>
               </HStack>
-              <Button title="Marcar como realizado" />
+              <Button
+                title="Marcar como realizado"
+                isLoading={sendingRegister}
+                onPress={handleExerciseHistoryRegister}
+              />
             </Box>
           </VStack>
         )}

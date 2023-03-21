@@ -45,8 +45,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const storageUserAndTokenRemove = async () => {
     try {
       setIsLoadingUserStorageData(true);
-      await storageUserRemove();
+      setUser({} as UserDTO);
       await storageAuthTokenRemove();
+      await storageUserRemove();
     } catch (error) {
       throw error;
     } finally {

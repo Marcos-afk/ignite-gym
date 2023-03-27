@@ -113,8 +113,7 @@ export const Profile = () => {
           },
         });
 
-        const userUpdated = user;
-        userUpdated.avatar = data.avatar;
+        const userUpdated = { ...user, avatar: data.avatar };
         await updateUserProfile(userUpdated);
 
         toast.show({
